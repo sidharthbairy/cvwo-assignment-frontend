@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Container, Paper, Typography, TextField, Button, Box, Link } from "@mui/material";
+import { API_BASE_URL } from "../config";
 
 const Login = () => {
     // STATE VARIABLES
@@ -16,7 +17,7 @@ const Login = () => {
         const endpoint = isRegistering ? "register" : "login";
 
         try {
-            const response = await fetch(`http://localhost:8080/${endpoint}`, {
+            const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",

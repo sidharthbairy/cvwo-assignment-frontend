@@ -2,12 +2,19 @@ import Home from "./pages/Home";
 import TopicView from "./pages/TopicView";
 import PostView from "./pages/PostView";
 import Login from "./pages/Login";
+import theme from "./theme"; 
+import PageLayout from "./components/PageLayout"; 
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { API_BASE_URL } from "./config";
 
 // MUI Imports
-import { CssBaseline, AppBar, Toolbar, Typography, Button, Container, Box, CircularProgress } from "@mui/material";
-import LogoutIcon from "@mui/icons-material/Logout";
+import {
+    CssBaseline,
+    Box,
+    CircularProgress,
+    ThemeProvider,
+} from "@mui/material";
 
 function App() {
     const navigate = useNavigate();
@@ -17,7 +24,7 @@ function App() {
 
     // Check if user is logged in (validate session)
     useEffect(() => {
-        fetch("http://localhost:8080/validate", { credentials: "include" })
+        fetch(`${API_BASE_URL}/validate`, { credentials: "include" })
             .then((res) => {
                 if (res.ok) return res.json();
                 throw new Error("Not logged in");
@@ -37,7 +44,7 @@ function App() {
     }, [location.pathname, navigate]);
 
     const handleLogout = async () => {
-        await fetch("http://localhost:8080/logout", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/logout`, { credentials: "include" });
         setCurrentUser(null);
         navigate("/login");
     };
@@ -52,33 +59,10 @@ function App() {
     }
 
     return (
-        <>
+        <ThemeProvider theme={theme}>
             <CssBaseline />
-
-            {/* Navbar - Only show if LOGGED IN */}
-            {currentUser && (
-                <AppBar position="static">
-                    <Toolbar>
-                        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                            <Link to="/" style={{ textDecoration: "none", color: "white" }}>
-                                Web Forum
-                            </Link>
-                        </Typography>
-
-                        <Box display="flex" alignItems="center" gap={2}>
-                            <Typography variant="body1">
-                                Hello, <strong>{currentUser}</strong>
-                            </Typography>
-                            <Button color="inherit" startIcon={<LogoutIcon />} onClick={handleLogout}>
-                                Logout
-                            </Button>
-                        </Box>
-                    </Toolbar>
-                </AppBar>
-            )}
-
             {/* Main Content Area */}
-            <Container maxWidth="md" sx={{ marginTop: 4 }}>
+            <PageLayout currentUser={currentUser} onLogout={handleLogout}>
                 <Routes>
                     {/* Public Route */}
                     <Route path="/login" element={<Login />} />
@@ -95,8 +79,8 @@ function App() {
                         <Route path="*" element={<Login />} />
                     )}
                 </Routes>
-            </Container>
-        </>
+            </PageLayout>
+        </ThemeProvider>
     );
 }
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 // MUI Imports
 import {
@@ -45,7 +46,7 @@ const TopicView = ({ currentUser }: TopicViewProps) => {
     const [newBody, setNewBody] = useState("");
 
     const fetchPosts = () => {
-        fetch(`http://localhost:8080/posts?topic_id=${id}`)
+        fetch(`${API_BASE_URL}/posts?topic_id=${id}`)
             .then((res) => res.json())
             .then((data) => setPosts(data || []))
             .catch((err) => console.error(err));
@@ -55,7 +56,7 @@ const TopicView = ({ currentUser }: TopicViewProps) => {
         fetchPosts();
 
         // Fetch Topic Name
-        fetch(`http://localhost:8080/topic?id=${id}`)
+        fetch(`${API_BASE_URL}/topic?id=${id}`)
             .then((res) => {
                 if (!res.ok) throw new Error("Topic not found");
                 return res.json();
@@ -68,7 +69,7 @@ const TopicView = ({ currentUser }: TopicViewProps) => {
         e.preventDefault();
 
         // Backend gets author from session cookie
-        const response = await fetch("http://localhost:8080/posts/create", {
+        const response = await fetch("${API_BASE_URL}/posts/create", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -89,7 +90,7 @@ const TopicView = ({ currentUser }: TopicViewProps) => {
     const handleDeletePost = async (postId: number) => {
         if (!window.confirm("Are you sure? This will delete all comments too.")) return;
 
-        const response = await fetch(`http://localhost:8080/posts/delete?id=${postId}`, {
+        const response = await fetch(`${API_BASE_URL}/posts/delete?id=${postId}`, {
             method: "DELETE",
             credentials: "include",
         });

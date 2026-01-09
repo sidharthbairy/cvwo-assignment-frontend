@@ -17,6 +17,7 @@ import {
 
 // Icons
 import { Delete as DeleteIcon, Edit as EditIcon, Save as SaveIcon, Cancel as CancelIcon } from "@mui/icons-material";
+import { API_BASE_URL } from "../config";
 
 interface Topic {
     id: number;
@@ -36,7 +37,7 @@ const Home = ({ currentUser }: HomeProps) => {
     const [editTitle, setEditTitle] = useState("");
 
     const fetchTopics = () => {
-        fetch("http://localhost:8080/topics")
+        fetch(`${API_BASE_URL}/topics`)
             .then((res) => res.json())
             .then((data) => setTopics(data || []))
             .catch((err) => console.error(err));
@@ -50,8 +51,8 @@ const Home = ({ currentUser }: HomeProps) => {
         e.preventDefault();
         if (!newTopicTitle) return;
 
-        // Backend uses the cookie to determine the author, so we just send the title
-        await fetch("http://localhost:8080/topics/create", {
+        // Backend uses the cookie to determine the author, so just send the title
+        await fetch(`${API_BASE_URL}/topics/create`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -65,7 +66,7 @@ const Home = ({ currentUser }: HomeProps) => {
     const handleDeleteTopic = async (id: number) => {
         if (!window.confirm("WARNING: Deleting this topic will delete ALL posts inside it!")) return;
 
-        await fetch(`http://localhost:8080/topics/delete?id=${id}`, {
+        await fetch(`${API_BASE_URL}/topics/delete?id=${id}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -79,7 +80,7 @@ const Home = ({ currentUser }: HomeProps) => {
 
     const saveEdit = async () => {
         if (!editingTopicId) return;
-        await fetch("http://localhost:8080/topics/update", {
+        await fetch(`${API_BASE_URL}/topics/update`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             credentials: "include",

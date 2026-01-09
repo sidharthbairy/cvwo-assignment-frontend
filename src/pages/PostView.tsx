@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 // MUI Imports
 import {
@@ -20,11 +21,16 @@ import {
 // Icons
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Delete as DeleteIcon, Edit as EditIcon, Save as SaveIcon, Cancel as CancelIcon } from "@mui/icons-material";
+import PushPinIcon from "@mui/icons-material/PushPin";
+import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
+import ReactMarkdown from "react-markdown";
+
 
 interface Comment {
     id: number;
     body: string;
     author: string;
+    is_pinned: boolean;
 }
 
 interface Post {
@@ -97,7 +103,7 @@ const PostView = ({ currentUser }: PostViewProps) => {
 
     // --- FETCHING ---
     const fetchData = () => {
-        fetch(`http://localhost:8080/post?id=${id}`)
+        fetch(`${API_BASE_URL}/post?id=${id}`)
             .then((res) => {
                 if (!res.ok) throw new Error("Post not found");
                 return res.json();
@@ -109,7 +115,7 @@ const PostView = ({ currentUser }: PostViewProps) => {
             })
             .catch((err) => console.error(err));
 
-        fetch(`http://localhost:8080/comments?post_id=${id}`)
+        fetch(`${API_BASE_URL}/comments?post_id=${id}`)
             .then((res) => res.json())
             .then((data) => setComments(data || []))
             .catch((err) => console.error(err));
@@ -122,7 +128,7 @@ const PostView = ({ currentUser }: PostViewProps) => {
     // --- POST OPERATIONS ---
     const handleUpdatePost = async () => {
         if (!post) return;
-        await fetch("http://localhost:8080/posts/update", {
+        await fetch(`${API_BASE_URL}/posts/update`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -137,7 +143,7 @@ const PostView = ({ currentUser }: PostViewProps) => {
         e.preventDefault();
         if (!newCommentText) return;
 
-        await fetch("http://localhost:8080/comments/create", {
+        await fetch(`${API_BASE_URL}/comments/create`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -150,7 +156,7 @@ const PostView = ({ currentUser }: PostViewProps) => {
 
     const handleDeleteComment = async (commentId: number) => {
         if (!window.confirm("Delete this comment?")) return;
-        await fetch(`http://localhost:8080/comments/delete?id=${commentId}`, {
+        await fetch(`${API_BASE_URL}/comments/delete?id=${commentId}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -163,13 +169,23 @@ const PostView = ({ currentUser }: PostViewProps) => {
     };
 
     const saveCommentEdit = async (commentId: number) => {
-        await fetch("http://localhost:8080/comments/update", {
+        await fetch(`${API_BASE_URL}/comments/update`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify({ id: commentId, body: editCommentBody }),
         });
         setEditingCommentId(null);
+        fetchData();
+    };
+
+    const handlePin = async (commentId: number) => {
+        await fetch(`${API_BASE_URL}/comments/pin`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ comment_id: commentId }),
+        });
         fetchData();
     };
 
@@ -230,9 +246,10 @@ const PostView = ({ currentUser }: PostViewProps) => {
                             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                                 Posted by {post.author}
                             </Typography>
-                            <Typography variant="body1" sx={{ mt: 2, lineHeight: 1.8 }}>
-                                {post.body}
-                            </Typography>
+                            <Box sx={{ "& p": { m: 0 } }}>
+                                {" "}
+                                <ReactMarkdown>{post.body}</ReactMarkdown>
+                            </Box>
                         </CardContent>
 
                         {post.author === currentUser && (
@@ -255,32 +272,79 @@ const PostView = ({ currentUser }: PostViewProps) => {
 
             <Stack spacing={2} sx={{ mb: 4 }}>
                 {comments.map((c) => (
-                    <Paper key={c.id} elevation={1} sx={{ p: 2, display: "flex", gap: 2 }}>
+                    <Paper
+                        key={c.id}
+                        elevation={1}
+                        sx={{
+                            p: 2,
+                            display: "flex",
+                            gap: 2,
+                            // PINNED STYLING: Subtle blue tint and border if pinned
+                            bgcolor: c.is_pinned ? "rgba(99, 102, 241, 0.08)" : "background.paper",
+                            border: c.is_pinned ? "1px solid" : "none",
+                            borderColor: "primary.light",
+                        }}
+                    >
                         {/* Avatar Circle */}
                         <Avatar {...stringAvatar(c.author)} />
 
                         <Box sx={{ flexGrow: 1 }}>
                             {/* Comment Header */}
                             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-                                <Typography variant="subtitle2" fontWeight="bold">
-                                    {c.author}
-                                </Typography>
+                                {/* Author Name + Pinned Badge */}
+                                <Box display="flex" alignItems="center" gap={1}>
+                                    {/* PINNED BADGE: Shows if the comment is pinned */}
+                                    {c.is_pinned && (
+                                        <PushPinIcon
+                                            fontSize="small"
+                                            color="primary"
+                                            sx={{ transform: "rotate(45deg)" }}
+                                        />
+                                    )}
+                                    <Typography
+                                        variant="subtitle2"
+                                        fontWeight="bold"
+                                        color={c.is_pinned ? "primary" : "textPrimary"}
+                                    >
+                                        {c.author}
+                                    </Typography>
+                                </Box>
 
-                                {/* Actions (Only show in View Mode) */}
-                                {c.author === currentUser && editingCommentId !== c.id && (
-                                    <Box>
-                                        <IconButton size="small" onClick={() => startEditingComment(c)}>
-                                            <EditIcon fontSize="small" />
-                                        </IconButton>
+                                {/* Actions Area */}
+                                <Box>
+                                    {/* PIN BUTTON: Only visible to the POST AUTHOR */}
+                                    {post?.author === currentUser && (
                                         <IconButton
                                             size="small"
-                                            color="error"
-                                            onClick={() => handleDeleteComment(c.id)}
+                                            onClick={() => handlePin(c.id)}
+                                            color="primary"
+                                            title={c.is_pinned ? "Unpin" : "Pin to top"}
+                                            sx={{ mr: 1 }}
                                         >
-                                            <DeleteIcon fontSize="small" />
+                                            {c.is_pinned ? (
+                                                <PushPinIcon fontSize="small" />
+                                            ) : (
+                                                <PushPinOutlinedIcon fontSize="small" />
+                                            )}
                                         </IconButton>
-                                    </Box>
-                                )}
+                                    )}
+
+                                    {/* Edit/Delete Buttons (Only for Comment Author) */}
+                                    {c.author === currentUser && editingCommentId !== c.id && (
+                                        <>
+                                            <IconButton size="small" onClick={() => startEditingComment(c)}>
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                            <IconButton
+                                                size="small"
+                                                color="error"
+                                                onClick={() => handleDeleteComment(c.id)}
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        </>
+                                    )}
+                                </Box>
                             </Box>
 
                             {/* Comment Body */}
@@ -289,10 +353,12 @@ const PostView = ({ currentUser }: PostViewProps) => {
                                 <Box>
                                     <TextField
                                         fullWidth
+                                        multiline
+                                        minRows={2}
                                         size="small"
                                         value={editCommentBody}
                                         onChange={(e) => setEditCommentBody(e.target.value)}
-                                        sx={{ mb: 1 }}
+                                        sx={{ mb: 1, bgcolor: "white" }}
                                     />
                                     <Button size="small" onClick={() => saveCommentEdit(c.id)} sx={{ mr: 1 }}>
                                         Save
@@ -303,7 +369,9 @@ const PostView = ({ currentUser }: PostViewProps) => {
                                 </Box>
                             ) : (
                                 // View Comment Mode
-                                <Typography variant="body2">{c.body}</Typography>
+                                <Box sx={{ fontSize: "0.875rem", "& p": { m: 0 } }}>
+                                    <ReactMarkdown>{c.body}</ReactMarkdown>
+                                </Box>
                             )}
                         </Box>
                     </Paper>
