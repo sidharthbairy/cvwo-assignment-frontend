@@ -1,6 +1,6 @@
+import { API_BASE_URL } from "../config";
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../config";
 
 // MUI Imports
 import {

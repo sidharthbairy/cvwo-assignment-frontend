@@ -1,6 +1,6 @@
+import { API_BASE_URL } from "../config";
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../config";
 
 // MUI Imports
 import {
@@ -24,7 +24,6 @@ import { Delete as DeleteIcon, Edit as EditIcon, Save as SaveIcon, Cancel as Can
 import PushPinIcon from "@mui/icons-material/PushPin";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import ReactMarkdown from "react-markdown";
-
 
 interface Comment {
     id: number;

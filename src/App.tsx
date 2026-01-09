@@ -2,19 +2,14 @@ import Home from "./pages/Home";
 import TopicView from "./pages/TopicView";
 import PostView from "./pages/PostView";
 import Login from "./pages/Login";
-import theme from "./theme"; 
-import PageLayout from "./components/PageLayout"; 
+import theme from "./theme";
+import PageLayout from "./components/PageLayout";
+import { API_BASE_URL } from "./config";
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { API_BASE_URL } from "./config";
 
 // MUI Imports
-import {
-    CssBaseline,
-    Box,
-    CircularProgress,
-    ThemeProvider,
-} from "@mui/material";
+import { CssBaseline, Box, CircularProgress, ThemeProvider } from "@mui/material";
 
 function App() {
     const navigate = useNavigate();

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -17,7 +18,6 @@ import {
 
 // Icons
 import { Delete as DeleteIcon, Edit as EditIcon, Save as SaveIcon, Cancel as CancelIcon } from "@mui/icons-material";
-import { API_BASE_URL } from "../config";
 
 interface Topic {
     id: number;

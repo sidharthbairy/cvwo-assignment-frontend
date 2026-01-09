@@ -1,6 +1,6 @@
+import { API_BASE_URL } from "../config";
 import React, { useState } from "react";
 import { Container, Paper, Typography, TextField, Button, Box, Link } from "@mui/material";
-import { API_BASE_URL } from "../config";
 
 const Login = () => {
     // STATE VARIABLES
