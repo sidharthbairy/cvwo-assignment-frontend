@@ -69,7 +69,7 @@ const TopicView = ({ currentUser }: TopicViewProps) => {
         e.preventDefault();
 
         // Backend gets author from session cookie
-        const response = await fetch("${API_BASE_URL}/posts/create", {
+        const response = await fetch(`${API_BASE_URL}/posts/create`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
