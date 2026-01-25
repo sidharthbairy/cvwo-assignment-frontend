@@ -11,3 +11,4 @@ yarn install
 ```bash
 yarn start
 ```
+**Deployed version:** https://cvwo-forum.netlify.app/
